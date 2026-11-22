@@ -10,6 +10,8 @@
 #include "secure-join/Prf/AltModPrf.h"
 #include "secure-join/Prf/AltModPrfProto.h"
 
+#include <tuple>
+
 // shift up past OLE and past OT
 const int OPRF_BASE_PORT = GILBOA_OLE_BASE_PORT + (MAX_POSSIBLE_THREADS * 32);
 
@@ -142,19 +144,19 @@ class OPRF {
 
         std::vector<oc::block> y(n);
 
-        // initialize the OLE generators
-        ole.init(sock_ole_send->fork(), prng, !isServer, 1, 1 << 18, 0);
-
-        // handle the thread pool, not quite sure what this does
+        // One thread runs the PRF and the OLE generator. The work guard keeps
+        // the pool alive while both tasks are scheduled on it.
         macoro::thread_pool pool;
-        auto e = pool.make_work();  // this line is CRITICAL, even though e is never used (reference
-                                    // counting)
+        auto work = pool.make_work();
         pool.create_threads(1);
 
+        // fork() copies the current executor. Install it first so OLE
+        // completions resume on this pool, same as the PRF task. An empty
+        // executor resumes on the Asio thread and races the generator.
         sock_main_send->setExecutor(pool);
         sock_ole_send->setExecutor(pool);
+        ole.init(sock_ole_send->fork(), prng, !isServer, 1, 1 << 18, 0);
 
-        // evaluate
         sender->init(n, ole, secJoin::AltModPrfKeyMode::SenderOnly,
                      secJoin::AltModPrfInputMode::ReceiverOnly, key, rk);
         sender->preprocess();
@@ -162,6 +164,10 @@ class OPRF {
         auto r = coproto::sync_wait(coproto::when_all_ready(
             ole.start() | macoro::start_on(pool),
             sender->evaluate({}, y, *sock_main_send, prng) | macoro::start_on(pool)));
+        // when_all_ready does not rethrow. An unchecked failure leaves y zero
+        // and the correctness test fails with no protocol error.
+        std::get<0>(r).result();
+        std::get<1>(r).result();
 
         oc::cp::sync_wait(sock_main_send->flush());  // flush the socket
         oc::cp::sync_wait(sock_ole_send->flush());   // flush the socket
@@ -202,19 +208,15 @@ class OPRF {
         std::vector<oc::block> x(reinterpret_cast<oc::block*>(x_vec.data()),
                                  reinterpret_cast<oc::block*>(x_vec.data() + n));
 
-        // initialize the OLE generators
-        ole.init(sock_ole_recv->fork(), prng, !isServer, 1, 1 << 18, 0);
-
-        // handle the thread pool, not quite sure what this does
         macoro::thread_pool pool;
-        auto e = pool.make_work();  // this line is CRITICAL, even though e is never used (reference
-                                    // counting)
+        auto work = pool.make_work();
         pool.create_threads(1);
 
+        // Same ordering as evaluate_sender: executor before fork.
         sock_main_recv->setExecutor(pool);
         sock_ole_recv->setExecutor(pool);
+        ole.init(sock_ole_recv->fork(), prng, !isServer, 1, 1 << 18, 0);
 
-        // evaluate
         receiver->init(n, ole, secJoin::AltModPrfKeyMode::SenderOnly,
                        secJoin::AltModPrfInputMode::ReceiverOnly, {}, sk);
         receiver->preprocess();
@@ -222,6 +224,8 @@ class OPRF {
         auto r = coproto::sync_wait(coproto::when_all_ready(
             ole.start() | macoro::start_on(pool),
             receiver->evaluate(x, y, *sock_main_recv, prng) | macoro::start_on(pool)));
+        std::get<0>(r).result();
+        std::get<1>(r).result();
 
         oc::cp::sync_wait(sock_main_recv->flush());  // flush the socket
         oc::cp::sync_wait(sock_ole_recv->flush());   // flush the socket
