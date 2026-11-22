@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 #include "backend/common/libote_io.h"
 #include "constants.h"
 #include "coproto/Socket/AsioSocket.h"
@@ -9,8 +11,6 @@
 #include "libOTe/config.h"
 #include "secure-join/Prf/AltModPrf.h"
 #include "secure-join/Prf/AltModPrfProto.h"
-
-#include <tuple>
 
 // shift up past OLE and past OT
 const int OPRF_BASE_PORT = GILBOA_OLE_BASE_PORT + (MAX_POSSIBLE_THREADS * 32);
