@@ -509,7 +509,7 @@ class Vector {
         Vector res = this->construct_like();
 
         for (VectorSizeType i = 0; i < size; ++i) {
-            res[i] = std::popcount(static_cast<Unsigned_type>((*this)[i])) & 1;
+            res[i] = orq::popcount(static_cast<Unsigned_type>((*this)[i])) & 1;
         }
 
         return res;

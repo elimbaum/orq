@@ -148,7 +148,7 @@ class OLEmodPrimeInterface {
 
     T getPrime() const { return prime; }
 
-    int primeBits() const { return std::bit_width(prime); }
+    int primeBits() const { return orq::bit_width(prime); }
 
     using ole_t = std::tuple<Vector<T>, Vector<wide_t>>;
 

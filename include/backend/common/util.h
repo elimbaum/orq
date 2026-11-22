@@ -1,6 +1,8 @@
 #pragma once
 
+#include <bit>
 #include <concepts>
+#include <cstdint>
 #include <type_traits>
 
 // GCC 15's libstdc++ does not treat __int128 as an integral type, so
@@ -33,6 +35,33 @@ inline constexpr bool is_signed_v =
 template <typename T>
 inline constexpr bool is_unsigned_v =
     std::is_unsigned_v<T> || std::same_as<std::remove_cv_t<T>, unsigned __int128>;
+
+// std::popcount and std::bit_width require __unsigned_integer, which also
+// excludes unsigned __int128 on GCC 15.
+constexpr int popcount(unsigned __int128 x) {
+    return std::popcount(static_cast<std::uint64_t>(x)) +
+           std::popcount(static_cast<std::uint64_t>(x >> 64));
+}
+
+template <typename T>
+    requires(!extended_integral<T>)
+constexpr int popcount(T x) {
+    return std::popcount(x);
+}
+
+constexpr int bit_width(unsigned __int128 x) {
+    auto hi = static_cast<std::uint64_t>(x >> 64);
+    if (hi != 0) {
+        return 64 + std::bit_width(hi);
+    }
+    return std::bit_width(static_cast<std::uint64_t>(x));
+}
+
+template <typename T>
+    requires(!extended_integral<T>)
+constexpr int bit_width(T x) {
+    return std::bit_width(x);
+}
 
 }  // namespace orq
 
