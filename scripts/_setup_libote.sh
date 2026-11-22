@@ -42,7 +42,10 @@ if [[ ! -f "${termios_header}" ]]; then
 fi
 TERMIOS_CXX_FLAGS="-DCMAKE_CXX_FLAGS=-include${termios_header}"
 
+# coproto leaves COPROTO_ASIO_LOG defined in every build. That log vector
+# is updated from Asio's io threads and throws std::length_error.
 python3 build.py --par=4 --boost --sodium --relic -DSODIUM_MONTGOMERY=false --all --install=../libOTe-install \
+    -DCMAKE_PROJECT_coproto_INCLUDE="${script_dir}/cmake/coproto-asio-log.cmake" \
     $SSE_OPTION $TERMIOS_CXX_FLAGS $AVX512_FLAG
 
 echo "==== libOTe installed"

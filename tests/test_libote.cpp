@@ -521,6 +521,10 @@ int main(int argc, char** argv) {
         test_silent_ot_local<int64_t>(test_size);
     }
 
+    // Party 0 runs the in-process tests above before it listens. Party 1
+    // would otherwise connect, retry, and speak to whatever accepts first.
+    MPI_Barrier(MPI_COMM_WORLD);
+
     // 2PC tests of Silent VOLE
     test_silent_vole_loopback<int8_t>(test_size);
     test_silent_vole_loopback<int32_t>(test_size);
