@@ -38,7 +38,8 @@ struct is_ntl_gf2e<NTL::GF2E> : std::true_type {};
 }  // namespace orq
 
 template <typename T>
-concept arithmetic = std::integral<T> or std::floating_point<T> or orq::is_ntl_gf2e<T>::value;
+concept arithmetic = std::integral<T> or extended_integral<T> or std::floating_point<T> or
+    orq::is_ntl_gf2e<T>::value;
 
 /**
  * @brief Define a binary operation between two vectors, such as `a - b`.
@@ -249,7 +250,8 @@ static inline void setBitMask(T& share, const bool& value, const std::make_unsig
 template <typename T>
 class Vector {
     template <typename U,
-              bool UseUnsigned = (std::integral<U> && !std::is_same_v<std::remove_cv_t<U>, bool>)>
+              bool UseUnsigned = ((std::integral<U> || extended_integral<U>) &&
+                                  !std::is_same_v<std::remove_cv_t<U>, bool>)>
     struct UnsignedTypeSelector {
         using type = U;
     };
@@ -418,7 +420,7 @@ class Vector {
      * conversion. Default is 16.
      */
     template <std::floating_point FP>
-        requires std::integral<T>
+        requires std::integral<T> || extended_integral<T>
     Vector(const std::vector<FP>& _other, int fixed_point_precision = 16)
         : Vector(static_cast<VectorSizeType>(_other.size())) {
         precision = fixed_point_precision;
