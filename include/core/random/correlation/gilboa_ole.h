@@ -38,7 +38,7 @@ class GilboaOLE : public OLEGenerator<T> {
     std::unique_ptr<OTRecvT> recv;
     std::unique_ptr<OTSendT> send;
 
-    static constexpr size_t L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    static constexpr size_t L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
 
     /**
      * @brief Sender side of an additive correlated OT. libOTe provides XOR-correlations; we

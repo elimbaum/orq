@@ -181,7 +181,7 @@ static inline T getBit(const T& share, int bitIndex) {
     if constexpr (_use_bmi && std::numeric_limits<T>::digits <= 64) {
         return _bextr_u64(share, bitIndex, 1);
     } else {
-        using Unsigned_type = typename std::make_unsigned<T>::type;
+        using Unsigned_type = orq::make_unsigned_t<T>;
         return ((Unsigned_type)share >> bitIndex) & (Unsigned_type)1;
     }
 }
@@ -195,7 +195,7 @@ static inline T getBit(const T& share, int bitIndex) {
  */
 template <typename T>
 static inline void setBit(T& share, const T& bit, int bitIndex) {
-    using Unsigned_type = typename std::make_unsigned<T>::type;
+    using Unsigned_type = orq::make_unsigned_t<T>;
     share = (share & ~(((Unsigned_type)1 << bitIndex))) | (bit << bitIndex);
 }
 
@@ -208,7 +208,7 @@ static inline void setBit(T& share, const T& bit, int bitIndex) {
  */
 template <typename T>
 static inline void clrBit(T& share, int bitIndex) {
-    using Unsigned_type = typename std::make_unsigned<T>::type;
+    using Unsigned_type = orq::make_unsigned_t<T>;
     share &= ~((Unsigned_type)1 << bitIndex);
 }
 
@@ -239,7 +239,7 @@ static inline void setBitValue(T& share, const T& value, int bitIndex) {
  * @param mask which bits to modify
  */
 template <typename T>
-static inline void setBitMask(T& share, const bool& value, const std::make_unsigned_t<T>& mask) {
+static inline void setBitMask(T& share, const bool& value, const orq::make_unsigned_t<T>& mask) {
     share = (share & ~mask) | (-value & mask);
 }
 
@@ -257,7 +257,7 @@ class Vector {
 
     template <typename U>
     struct UnsignedTypeSelector<U, true> {
-        using type = std::make_unsigned_t<U>;
+        using type = orq::make_unsigned_t<U>;
     };
 
     /**

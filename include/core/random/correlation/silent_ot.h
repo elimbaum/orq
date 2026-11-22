@@ -173,7 +173,7 @@ class SilentOT : public OTGenerator<T> {
     bool isServer;
     int thread;
 
-    size_t L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    size_t L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
 
    public:
     /**

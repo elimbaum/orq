@@ -79,7 +79,7 @@ class Vector {
 
     template <typename U>
     struct UnsignedTypeSelector<U, true> {
-        using type = std::make_unsigned_t<U>;
+        using type = orq::make_unsigned_t<U>;
     };
 
     /**

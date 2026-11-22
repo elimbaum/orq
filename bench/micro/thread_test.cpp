@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 
     BSharedVector<T> a(test_size), b(test_size);
 
-    const int bw = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    const int bw = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
 
     single_cout("Test " << test_size << " x " << bw << " " << op << "\n");
 

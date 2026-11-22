@@ -77,7 +77,7 @@ class TPCDatabase {
      * @return Vector<T>
      */
     Vector<T> randomColumn(size_t size, T min_val, T max_val) {
-        using uT = std::make_unsigned_t<T>;
+        using uT = orq::make_unsigned_t<T>;
 
         Vector<uT> uvec(size);
         runTime->populateLocalRandom(uvec);

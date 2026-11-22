@@ -58,7 +58,7 @@ void test_minimal_agg_example() {
 
 template <typename S>
 void test_vector_aggregation(const size_t test_size = 32) {
-    single_cout("Testing " << std::numeric_limits<std::make_unsigned_t<S>>::digits
+    single_cout("Testing " << std::numeric_limits<orq::make_unsigned_t<S>>::digits
                            << "-bit vector aggregation...");
     std::vector<S> data(test_size);
     // TODO: random values
@@ -199,7 +199,7 @@ void test_vector_aggregation(const size_t test_size = 32) {
 
 template <typename S>
 void test_distinct(const int test_size = 32) {
-    single_cout("Testing " << std::numeric_limits<std::make_unsigned_t<S>>::digits
+    single_cout("Testing " << std::numeric_limits<orq::make_unsigned_t<S>>::digits
                            << "-bit distinct...");
     orq::Vector<S> data(test_size);
     orq::Vector<S> truth(test_size);
@@ -237,7 +237,7 @@ void test_distinct(const int test_size = 32) {
 
 template <typename S>
 void test_multi_distinct() {
-    single_cout("Testing " << std::numeric_limits<std::make_unsigned_t<S>>::digits
+    single_cout("Testing " << std::numeric_limits<orq::make_unsigned_t<S>>::digits
                            << "-bit multi-key distinct...");
     auto pid = runTime->getPartyID();
     std::vector<orq::Vector<S>> c1 = {{0, 0, 0, 1, 1, 1, 2}, {0, 0, 1, 1, 1, 0, 2}, Vector<int>(7)};
@@ -259,7 +259,7 @@ void test_multi_distinct() {
 // TODO: auto generate tables and test results as above.
 template <typename S>
 void test_table_operators() {
-    single_cout("Testing " << std::numeric_limits<std::make_unsigned_t<S>>::digits
+    single_cout("Testing " << std::numeric_limits<orq::make_unsigned_t<S>>::digits
                            << "-bit tables...");
 
     const std::vector<std::string> schema = {

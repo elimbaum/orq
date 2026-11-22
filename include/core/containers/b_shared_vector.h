@@ -48,7 +48,7 @@ using unique_B = std::unique_ptr<BSharedVector<S, E>>;
  */
 template <typename Share, typename EVector>
 class BSharedVector : public SharedVector<Share, EVector> {
-    static const uint MAX_BITS_NUMBER = std::numeric_limits<std::make_unsigned_t<Share>>::digits;
+    static const uint MAX_BITS_NUMBER = std::numeric_limits<orq::make_unsigned_t<Share>>::digits;
     static const uint LOG_MAX_BITS_NUMBER = std::bit_width(MAX_BITS_NUMBER - 1);
 
     using unique_B = std::unique_ptr<BSharedVector>;

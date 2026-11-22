@@ -11,6 +11,8 @@
 #include <limits>
 #include <type_traits>
 
+#include "backend/common/util.h"
+
 namespace orq::math {
 
 static_assert(std::numeric_limits<unsigned long>::digits == 64, "unsigned long must be 64 bits");
@@ -37,7 +39,7 @@ NTL::ZZ to_ZZ(T x) {
         return NTL::ZZ(x);
     } else {
         // 128-bit
-        using U = std::make_unsigned_t<T>;
+        using U = orq::make_unsigned_t<T>;
         static_assert(std::numeric_limits<U>::digits == 128);
 
         U ux = static_cast<U>(x);
@@ -45,7 +47,7 @@ NTL::ZZ to_ZZ(T x) {
         auto hi = static_cast<unsigned long>(ux >> 64);
         NTL::ZZ res = (NTL::to_ZZ(hi) << 64) | NTL::to_ZZ(lo);
 
-        if constexpr (std::is_signed_v<T>) {
+        if constexpr (orq::is_signed_v<T>) {
             if (x < 0) {
                 // handle 2s compl
                 res -= pow_128;
@@ -66,17 +68,17 @@ NTL::ZZ to_ZZ(T x) {
 template <typename T>
 T from_ZZ(NTL::ZZ x) {
     if constexpr (sizeof(T) <= sizeof(long)) {
-        if constexpr (std::is_signed_v<T>) {
+        if constexpr (orq::is_signed_v<T>) {
             return static_cast<T>(NTL::to_long(x));
         } else {
             return static_cast<T>(NTL::to_ulong(x));
         }
     } else {
         // 128-bit
-        using U = std::make_unsigned_t<T>;
+        using U = orq::make_unsigned_t<T>;
         static_assert(std::numeric_limits<U>::digits == 128);
 
-        if constexpr (std::is_signed_v<T>) {
+        if constexpr (orq::is_signed_v<T>) {
             if (x < 0) {
                 // handle 2s compl
                 x += pow_128;
