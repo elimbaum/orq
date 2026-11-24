@@ -22,9 +22,7 @@ jobs:
   test-all-3pc:
     if: github.event.pull_request.draft == false
 
-    # ubuntu-latest, for private repos, only gives us 2 cores
-    # see github docs for more info
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # Bumping this because apt install is slow (and we need coproto installed)
     timeout-minutes: 30
@@ -64,7 +62,7 @@ jobs:
 
   test-2pc:
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # This should be more than enough time to run tests, but also need enough
     # time to install libOTe + save cache, where necessary
@@ -140,9 +138,9 @@ jobs:
   test-others:
     if: github.event.pull_request.draft == false
 
-    # ubuntu-latest, for private repos, only gives us 2 cores
+    # for private repos, only gives us 2 cores
     # see github docs for more info
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     timeout-minutes: 10
 
