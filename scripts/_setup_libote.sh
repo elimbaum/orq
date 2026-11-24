@@ -6,46 +6,28 @@ set -e
 ## Set up libOTe
 echo "==== Building libOTe..."
 
-# Resolve before _clone_libote.sh, which cds into libOTe.
-script_dir=$(cd "$(dirname "$0")" && pwd)
-source "${script_dir}/_clone_libote.sh"
+source $(dirname $0)/_clone_libote.sh
 
-case "$(uname -m)" in
-    x86_64|amd64|AMD64)
-        SSE_OPTION="-DENABLE_SSE=ON"
-        # Do not cache an AVX-512 libOTe and run it on an AVX2-only runner.
-        # Leave host detection alone on other x86 machines.
-        AVX512_FLAG=
-        if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
-            AVX512_FLAG="-DENABLE_AVX512=OFF"
-        fi
-        ;;
-    *)
-        # SSE, AVX, and AVX-512 are x86. ARM builds use the scalar paths.
-        SSE_OPTION="-DENABLE_SSE=OFF -DENABLE_AVX=OFF -DENABLE_AVX512=OFF -DENABLE_SPIN=OFF"
-        AVX512_FLAG=
-        ;;
-esac
-
-# <termios.h> #defines B0 as the baud rate 0. macOS has always done this, and
-# glibc does too (bits/termios.h). libOTe tests declare variables named B0
-# after Boost.Asio has included termios.h, so the preprocessor turns B0(n)
-# into a numeric constant. Force-include a header that keeps B0 usable both
-# as an identifier and as Asio's baud-rate constant. The compiler is launched
-# from per-target directories under out/build, at different depths, so a
-# relative -include path cannot resolve. Pass an absolute path with no space:
-# build.py joins arguments into a shell command.
-termios_header="${script_dir}/mac_undef_termios.h"
-if [[ ! -f "${termios_header}" ]]; then
-    echo "missing termios workaround header: ${termios_header}" >&2
-    exit 1
+if [[ $(uname -m) == x86_64 ]]; then
+    SSE_OPTION="-DENABLE_SSE=ON"
+else
+    SSE_OPTION="-DENABLE_SSE=OFF -DENABLE_AVX=OFF "
 fi
-TERMIOS_CXX_FLAGS="-DCMAKE_CXX_FLAGS=-include${termios_header}"
 
-# coproto leaves COPROTO_ASIO_LOG defined in every build. That log vector
-# is updated from Asio's io threads and throws std::length_error.
-python3 build.py --par=4 --boost --sodium --relic -DSODIUM_MONTGOMERY=false --all --install=../libOTe-install \
-    -DCMAKE_PROJECT_coproto_INCLUDE="${script_dir}/cmake/coproto-asio-log.cmake" \
-    $SSE_OPTION $TERMIOS_CXX_FLAGS $AVX512_FLAG
+# <format> is in libstdc++ from GCC 13. Use g++-13 when the default compiler is older.
+if ! echo '#include <format>' | ${CXX:-g++} -std=c++20 -x c++ -E - >/dev/null 2>&1; then
+    if command -v g++-13 >/dev/null 2>&1; then
+        export CXX=g++-13
+        export CC=gcc-13
+    else
+        echo "libOTe requires GCC 13 or newer (missing <format>). Install g++-13 and rerun." >&2
+        exit 1
+    fi
+fi
+
+# Boost.Asio includes <termios.h>, and that header's B0 macro breaks the libOTe tests.
+python3 build.py --par=4 --boost --sodium --relic -DSODIUM_MONTGOMERY=false -DENABLE_LOGVOLE=OFF --all --install=../libOTe-install \
+    -DCMAKE_CXX_FLAGS=-DBOOST_ASIO_DISABLE_SERIAL_PORT \
+    $SSE_OPTION
 
 echo "==== libOTe installed"

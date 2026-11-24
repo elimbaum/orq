@@ -95,7 +95,7 @@ jobs:
         with:
           path: |
             build/libOTe-install
-          key: secrecy-libote-${{ hashFiles('scripts/_setup_libote.sh', 'scripts/_clone_libote.sh', 'scripts/cmake/coproto-asio-log.cmake') }}
+          key: secrecy-libote-${{ hashFiles('scripts/_setup_libote.sh', 'scripts/_clone_libote.sh') }}
 
       # cache miss, so install from scratch
       - if: ${{ steps.cache-deps.outputs.cache-hit != 'true' }}
@@ -110,7 +110,7 @@ jobs:
         with:
           path: |
             build/secure-join-install
-          key: secrecy-securejoin-${{ hashFiles('scripts/_setup_libote.sh', 'scripts/_clone_libote.sh', 'scripts/_setup_securejoin.sh', 'scripts/cmake/securejoin-libote.cmake', 'scripts/cmake/coproto-asio-log.cmake') }}
+          key: secrecy-securejoin-${{ hashFiles('scripts/_setup_libote.sh', 'scripts/_clone_libote.sh', 'scripts/_setup_securejoin.sh') }}
 
       # cache miss, so install from scratch
       - if: ${{ steps.cache-securejoin.outputs.cache-hit != 'true' }}
