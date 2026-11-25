@@ -71,15 +71,15 @@ namespace service {
  */
 template <typename T>
 class Vector {
-    template <typename U,
-              bool UseUnsigned = (std::integral<U> && !std::is_same_v<std::remove_cv_t<U>, bool>)>
+    template <typename U, bool UseUnsigned = ((std::integral<U> || extended_integral<U>) &&
+                                              !std::is_same_v<std::remove_cv_t<U>, bool>)>
     struct UnsignedTypeSelector {
         using type = U;
     };
 
     template <typename U>
     struct UnsignedTypeSelector<U, true> {
-        using type = std::make_unsigned_t<U>;
+        using type = orq::make_unsigned_t<U>;
     };
 
     /**
@@ -161,7 +161,7 @@ class Vector {
      * conversion. Default is 16.
      */
     template <std::floating_point FP>
-        requires std::integral<T>
+        requires std::integral<T> || extended_integral<T>
     Vector(const std::vector<FP>& _other, int fixed_point_precision = 16)
         : Vector(static_cast<VectorSizeType>(_other.size())) {
         precision = fixed_point_precision;

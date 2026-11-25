@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     ASharedVector<T> x(test_size), y(test_size);
 
     single_cout("Vector " << test_size << " x "
-                          << std::numeric_limits<std::make_unsigned_t<T>>::digits << "b");
+                          << std::numeric_limits<orq::make_unsigned_t<T>>::digits << "b");
 
     stopwatch::timepoint("Start");
 

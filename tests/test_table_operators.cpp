@@ -29,7 +29,7 @@ void assert_table_schema(EncodedTable<T> table, size_t column_count) {
 
 template <typename T>
 void test_add_columns() {
-    single_cout_nonl("Testing " << std::numeric_limits<std::make_unsigned_t<T>>::digits
+    single_cout_nonl("Testing " << std::numeric_limits<orq::make_unsigned_t<T>>::digits
                                 << "-bit: addColumns... ");
 
     EncodedTable<T> table = create_test_table<T>(1);
@@ -47,7 +47,7 @@ void test_add_columns() {
 
 template <typename T>
 void test_delete_columns() {
-    single_cout_nonl("Testing " << std::numeric_limits<std::make_unsigned_t<T>>::digits
+    single_cout_nonl("Testing " << std::numeric_limits<orq::make_unsigned_t<T>>::digits
                                 << "-bit: deleteColumns... ");
 
     EncodedTable<T> table = create_test_table<T>(6);
@@ -69,7 +69,7 @@ void test_delete_columns() {
 
 template <typename T>
 void test_project() {
-    single_cout_nonl("Testing " << std::numeric_limits<std::make_unsigned_t<T>>::digits
+    single_cout_nonl("Testing " << std::numeric_limits<orq::make_unsigned_t<T>>::digits
                                 << "-bit: project... ");
 
     // Project single column
@@ -91,7 +91,7 @@ void test_project() {
 
 template <typename T>
 void test_resize() {
-    single_cout_nonl("Testing " << std::numeric_limits<std::make_unsigned_t<T>>::digits
+    single_cout_nonl("Testing " << std::numeric_limits<orq::make_unsigned_t<T>>::digits
                                 << "-bit: resize... ");
 
     const size_t n_rows = 10000;

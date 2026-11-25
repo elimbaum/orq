@@ -692,7 +692,7 @@ class Protocol : public ProtocolBase {
      * @param x - The shared vector to truncate.
      */
     virtual void truncate(EVector& x) {
-        if constexpr (!std::integral<Data>) {
+        if constexpr (!(std::integral<Data> || extended_integral<Data>)) {
             // Only integral types support fixed point (no NTL types)
             return;
         } else {

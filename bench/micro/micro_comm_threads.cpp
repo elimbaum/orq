@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
         comm_suffix = "NoCopyComm (" + std::to_string(NOCOPY_COMMUNICATOR_THREADS) + ")";
 
     single_cout(
-        "Vector: " << test_size << " x " << std::numeric_limits<std::make_unsigned_t<T>>::digits
+        "Vector: " << test_size << " x " << std::numeric_limits<orq::make_unsigned_t<T>>::digits
                    << "b | Sample count: " << SAMPLE_COUNT << " | Communicator: " << comm_suffix);
 
 #ifdef CORRECTNESS_CHECK

@@ -508,7 +508,7 @@ static void print_table(const std::pair<TableType, std::vector<std::string>>& ta
 
 template <typename T>
 T get_bit(const T& s, int i) {
-    using Unsigned_type = typename std::make_unsigned<T>::type;
+    using Unsigned_type = orq::make_unsigned_t<T>;
     return ((Unsigned_type)s >> i) & (Unsigned_type)1;
 }
 

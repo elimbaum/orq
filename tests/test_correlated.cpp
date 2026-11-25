@@ -15,7 +15,7 @@ const size_t test_size = 1 << 12;
 
 template <typename T, template <typename> class C>
 void checkCorrelation(std::string label) {
-    auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
     single_cout_nonl("Checking length " << test_size << " " << L << "-bit " << label << "... ");
 
     auto gen = runTime->rand0()->template getCorrelation<T, C<T>>();

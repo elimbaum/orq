@@ -30,7 +30,7 @@ namespace operators {
     template <typename S, typename E>
     static ElementwisePermutation<E> radix_sort(
         BSharedVector<S, E>& v, SortOrder order = SortOrder::ASC,
-        const size_t bits = std::numeric_limits<std::make_unsigned_t<S>>::digits,
+        const size_t bits = std::numeric_limits<orq::make_unsigned_t<S>>::digits,
         bool no_invert = false);
     // \endcond DOXYGEN_IGNORE
 

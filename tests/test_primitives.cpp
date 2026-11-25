@@ -43,7 +43,7 @@ void test_b2a(int test_size) {
 #define DEFINE_TEST_BINARY_OP(_op_, shareType, name)                   \
     template <typename T>                                              \
     void test_##name(int test_size) {                                  \
-        auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits; \
+        auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits; \
         single_cout_nonl(L << "-bit " #name "... ");                   \
         orq::Vector<T> x(test_size);                                   \
         orq::Vector<T> y(test_size);                                   \
@@ -83,7 +83,7 @@ DEFINE_TEST_BINARY_OP(<, BSharedVector, less_than);
 
 template <typename T>
 void test_private_division(int test_size) {
-    using uT = std::make_unsigned_t<T>;
+    using uT = orq::make_unsigned_t<T>;
     auto L = std::numeric_limits<uT>::digits;
     single_cout_nonl("Boolean long division, " << L << "-bit... ");
 
@@ -120,7 +120,7 @@ void test_private_division(int test_size) {
 
 template <typename T>
 void test_dot_product(int test_size, const int aggSize = 7) {
-    auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
     single_cout_nonl(L << "-bit dot product(" << aggSize << ")... ");
 
     if (test_size % aggSize != 0) {
@@ -149,7 +149,7 @@ void test_dot_product(int test_size, const int aggSize = 7) {
 
 template <typename T>
 void test_equals(int test_size) {
-    auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
     single_cout_nonl(L << "-bit equals...");
     orq::Vector<T> x(test_size), y(test_size);
 

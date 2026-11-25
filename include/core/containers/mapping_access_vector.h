@@ -38,7 +38,8 @@ struct is_ntl_gf2e<NTL::GF2E> : std::true_type {};
 }  // namespace orq
 
 template <typename T>
-concept arithmetic = std::integral<T> or std::floating_point<T> or orq::is_ntl_gf2e<T>::value;
+concept arithmetic = std::integral<T> or extended_integral<T> or std::floating_point<T> or
+                     orq::is_ntl_gf2e<T>::value;
 
 /**
  * @brief Define a binary operation between two vectors, such as `a - b`.
@@ -180,7 +181,7 @@ static inline T getBit(const T& share, int bitIndex) {
     if constexpr (_use_bmi && std::numeric_limits<T>::digits <= 64) {
         return _bextr_u64(share, bitIndex, 1);
     } else {
-        using Unsigned_type = typename std::make_unsigned<T>::type;
+        using Unsigned_type = orq::make_unsigned_t<T>;
         return ((Unsigned_type)share >> bitIndex) & (Unsigned_type)1;
     }
 }
@@ -194,7 +195,7 @@ static inline T getBit(const T& share, int bitIndex) {
  */
 template <typename T>
 static inline void setBit(T& share, const T& bit, int bitIndex) {
-    using Unsigned_type = typename std::make_unsigned<T>::type;
+    using Unsigned_type = orq::make_unsigned_t<T>;
     share = (share & ~(((Unsigned_type)1 << bitIndex))) | (bit << bitIndex);
 }
 
@@ -207,7 +208,7 @@ static inline void setBit(T& share, const T& bit, int bitIndex) {
  */
 template <typename T>
 static inline void clrBit(T& share, int bitIndex) {
-    using Unsigned_type = typename std::make_unsigned<T>::type;
+    using Unsigned_type = orq::make_unsigned_t<T>;
     share &= ~((Unsigned_type)1 << bitIndex);
 }
 
@@ -238,7 +239,7 @@ static inline void setBitValue(T& share, const T& value, int bitIndex) {
  * @param mask which bits to modify
  */
 template <typename T>
-static inline void setBitMask(T& share, const bool& value, const std::make_unsigned_t<T>& mask) {
+static inline void setBitMask(T& share, const bool& value, const orq::make_unsigned_t<T>& mask) {
     share = (share & ~mask) | (-value & mask);
 }
 
@@ -248,15 +249,15 @@ static inline void setBitMask(T& share, const bool& value, const std::make_unsig
  */
 template <typename T>
 class Vector {
-    template <typename U,
-              bool UseUnsigned = (std::integral<U> && !std::is_same_v<std::remove_cv_t<U>, bool>)>
+    template <typename U, bool UseUnsigned = ((std::integral<U> || extended_integral<U>) &&
+                                              !std::is_same_v<std::remove_cv_t<U>, bool>)>
     struct UnsignedTypeSelector {
         using type = U;
     };
 
     template <typename U>
     struct UnsignedTypeSelector<U, true> {
-        using type = std::make_unsigned_t<U>;
+        using type = orq::make_unsigned_t<U>;
     };
 
     /**
@@ -418,7 +419,7 @@ class Vector {
      * conversion. Default is 16.
      */
     template <std::floating_point FP>
-        requires std::integral<T>
+        requires std::integral<T> || extended_integral<T>
     Vector(const std::vector<FP>& _other, int fixed_point_precision = 16)
         : Vector(static_cast<VectorSizeType>(_other.size())) {
         precision = fixed_point_precision;
@@ -508,7 +509,7 @@ class Vector {
         Vector res = this->construct_like();
 
         for (VectorSizeType i = 0; i < size; ++i) {
-            res[i] = std::popcount(static_cast<Unsigned_type>((*this)[i])) & 1;
+            res[i] = orq::popcount(static_cast<Unsigned_type>((*this)[i])) & 1;
         }
 
         return res;

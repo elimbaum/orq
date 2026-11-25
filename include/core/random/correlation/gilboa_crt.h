@@ -169,7 +169,7 @@ namespace internal {
  */
 template <typename T>
 class GilboaCRT : public OLEGenerator<T> {
-    static constexpr int L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    static constexpr int L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
 
     using OLEBase = OLEGenerator<T>;
 

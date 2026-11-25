@@ -5,7 +5,7 @@ project(Orq VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(OPT_LEVEL "2" CACHE STRING "Optimization level (0-3)")
-set(CMAKE_CXX_FLAGS "-O${OPT_LEVEL} -pthread -fwrapv")
+set(CMAKE_CXX_FLAGS "-O${OPT_LEVEL} -g -pthread -fwrapv")
 
 add_compile_options(-Wno-deprecated-declarations)
 
@@ -25,13 +25,7 @@ endif (PERF)
 
 if (NOT NO_X86_SSE)
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
-        # ubuntu-latest runners are a mix of AVX2-only and AVX-512 machines, and
-        # x86-64-v3 (common ancestor) is sufficient for our purposes.
-        if(DEFINED ENV{GITHUB_ACTIONS})
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mbmi -march=x86-64-v3")
-        else()
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mbmi -march=native")
-        endif()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mbmi -march=native")
     endif()
 endif (NOT NO_X86_SSE)
 
@@ -96,6 +90,10 @@ find_package(Threads REQUIRED)
 # Adding Dependencies
 # add_subdirectory(src/external-lib/sql-parser)
 
+# Skip MPI C++ bindings: RELIC (via libOTe/SecureJoin) #define's DOUBLE,
+# which collides with OpenMPI's MPI::DOUBLE when the CXX headers are pulled in.
+add_compile_definitions(OMPI_SKIP_MPICXX MPICH_SKIP_MPICXX)
+
 # Adding MPI Library
 find_package(MPI REQUIRED)
 if (MPI_FOUND)
@@ -129,9 +127,7 @@ if (PROTOCOL EQUAL "2" AND LINK_LIBOTE)
 
     find_package(secureJoin REQUIRED HINTS
         secure-join-install/lib/cmake/secureJoin/
-        secure-join-install/lib64/cmake/secureJoin/
-        build/secure-join-install/lib/cmake/secureJoin/
-        build/secure-join-install/lib64/cmake/secureJoin/)
+        build/secure-join-install/lib/cmake/secureJoin/)
     link_directories(${CMAKE_CURRENT_SOURCE_DIR}/build/secure-join-install/lib)
 endif ()
 
@@ -143,10 +139,10 @@ find_package(cryptoTools REQUIRED HINTS
 list(APPEND LINK_LIBRARIES "oc::cryptoTools")
 
 function(add_secure_join target_name)
-  if(PROTOCOL EQUAL "2" AND LINK_LIBOTE)
-    target_link_libraries(${target_name} secureJoin)
-    target_include_directories(${target_name} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/build/secure-join-install/include/secureJoin/)
-  endif()
+    if(PROTOCOL EQUAL "2" AND LINK_LIBOTE)
+        target_link_libraries(${target_name} secureJoin)
+        target_include_directories(${target_name} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/build/secure-join-install/include/secureJoin/)
+    endif()
 endfunction()
 
 # Option: switch between custom 4PC and original Dalskov et al. protocol

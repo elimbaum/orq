@@ -53,7 +53,7 @@ inline auto eval(macoro::task<>& t0, macoro::task<>& t1) {
  */
 template <typename F>
 void test_noisy_vole_local(u64 n) {
-    auto L = std::numeric_limits<std::make_unsigned_t<F>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<F>>::digits;
     std::cout << "Local Noisy VOLE " << L << "-bit... ";
 
     std::vector<F> A(n), B(n), C(n);
@@ -108,7 +108,7 @@ void test_noisy_vole_local(u64 n) {
  */
 template <typename F>
 void test_silent_vole_local(u64 n) {
-    auto L = std::numeric_limits<std::make_unsigned_t<F>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<F>>::digits;
     std::cout << "Local Silent VOLE " << L << "-bit... ";
 
     using VecF = typename Ctx::template Vec<F>;
@@ -155,7 +155,7 @@ const uint LOG_OT_BLOCK_SIZE = std::bit_width(OT_BLOCK_SIZE) - 1;
 template <typename F>
 void test_silent_ot_local(u64 n) {
     assert(n % OT_BLOCK_SIZE == 0);
-    auto L = std::numeric_limits<std::make_unsigned_t<F>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<F>>::digits;
     std::cout << "Local Silent OT " << L << "-bit... ";
 
     PRNG prng(sysRandomSeed());
@@ -236,7 +236,7 @@ void test_silent_ot_local(u64 n) {
  */
 template <typename F>
 void test_silent_vole_loopback(u64 n) {
-    auto L = std::numeric_limits<std::make_unsigned_t<F>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<F>>::digits;
     single_cout_nonl("LAN Silent OLE " << L << "-bit... ");
 
     using VecF = typename Ctx::template Vec<F>;
@@ -304,7 +304,7 @@ void test_silent_vole_loopback(u64 n) {
 template <typename F>
 void test_silent_ot_loopback(u64 n) {
     assert(n % OT_BLOCK_SIZE == 0);
-    auto L = std::numeric_limits<std::make_unsigned_t<F>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<F>>::digits;
 
     bool isServer = (runTime->getPartyID() == 0);
 
@@ -399,7 +399,7 @@ void test_silent_ot_loopback(u64 n) {
 
 template <typename F>
 void test_silent_ot_chosen(u64 n) {
-    auto L = std::numeric_limits<std::make_unsigned_t<F>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<F>>::digits;
 
     bool isServer = (runTime->getPartyID() == 0);
 
@@ -520,6 +520,10 @@ int main(int argc, char** argv) {
         test_silent_ot_local<int32_t>(test_size);
         test_silent_ot_local<int64_t>(test_size);
     }
+
+    // Party 0 runs the in-process tests above before it listens. Party 1
+    // would otherwise connect, retry, and speak to whatever accepts first.
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // 2PC tests of Silent VOLE
     test_silent_vole_loopback<int8_t>(test_size);

@@ -88,7 +88,7 @@ class ElementwisePermutation {
     ElementwisePermutation(const SharedVector<Share, argEVector> &v)
         : sharedVector(v.vector, v.encoding) {
         // ensure we're not discarding data when converting to 32 bits
-        const int bit_length = std::numeric_limits<std::make_unsigned_t<Share>>::digits;
+        const int bit_length = std::numeric_limits<orq::make_unsigned_t<Share>>::digits;
         static_assert(bit_length <= 32);
     }
 
