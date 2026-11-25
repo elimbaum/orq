@@ -47,7 +47,7 @@ using sec = duration<float, seconds::period>;
 #endif
 
 using T = int64_t;
-using uT = std::make_unsigned_t<T>;
+using uT = orq::make_unsigned_t<T>;
 
 // Setting these up to be roughly similar in size to TPCH, SF 1 -> ~5M rows
 // Update later based on dataset if required

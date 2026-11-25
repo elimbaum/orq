@@ -64,7 +64,7 @@ class Dummy_0PC : public Protocol<Data, Share, Vector, EVector> {
                                               })
                                  ->second;
 
-        auto bits = std::numeric_limits<std::make_unsigned_t<Data>>::digits;
+        auto bits = std::numeric_limits<orq::make_unsigned_t<Data>>::digits;
 
         uint64_t max_count_width = std::ceil(std::log10(max_count * bits));
 

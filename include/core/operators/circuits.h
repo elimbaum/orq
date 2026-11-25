@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include "core/containers/a_shared_vector.h"
 #include "core/containers/b_shared_vector.h"
 
 namespace orq::operators {
@@ -36,7 +37,7 @@ template <typename Share, typename EVector>
 static unique_B<Share, EVector> ripple_carry_adder(const BSharedVector<Share, EVector>& a,
                                                    const BSharedVector<Share, EVector>& b,
                                                    const bool carry_in) {
-    static const size_t MAX_BITS_NUMBER = std::numeric_limits<std::make_unsigned_t<Share>>::digits;
+    static const size_t MAX_BITS_NUMBER = std::numeric_limits<orq::make_unsigned_t<Share>>::digits;
     size_t compressed_size = math::div_ceil(a.size(), MAX_BITS_NUMBER);
 
     // Compressed vectors
@@ -95,7 +96,7 @@ static unique_B<S, E> rca_compare(const BSharedVector<S, E>& a, const BSharedVec
     // compute a + (~b) + 1
     auto nb = ~b;
 
-    static const size_t MAX_BITS_NUMBER = std::numeric_limits<std::make_unsigned_t<S>>::digits;
+    static const size_t MAX_BITS_NUMBER = std::numeric_limits<orq::make_unsigned_t<S>>::digits;
     size_t compressed_size = math::div_ceil(a.size(), MAX_BITS_NUMBER);
 
     // Compressed vectors
@@ -179,7 +180,7 @@ std::pair<BSharedVector<S, E>, BSharedVector<S, E>> prefix_sum(
 template <typename S, typename E>
 unique_B<S, E> parallel_prefix_adder(const BSharedVector<S, E>& current,
                                      const BSharedVector<S, E>& other, const bool carry_in) {
-    static const uint MAX_BITS_NUMBER = std::numeric_limits<std::make_unsigned_t<S>>::digits;
+    static const uint MAX_BITS_NUMBER = std::numeric_limits<orq::make_unsigned_t<S>>::digits;
     static const uint LOG_MAX_BITS_NUMBER = std::bit_width(MAX_BITS_NUMBER - 1);
 
     BSharedVector<S, E> p = current ^ other, g = current & other, propagate(current.size());
@@ -233,7 +234,7 @@ static void linear_compare(const BSharedVector<S, E>& current, const BSharedVect
     assert(size == other.size());
 
     // Number of bits in the share representation
-    const size_t MAX_BITS_NUMBER = std::numeric_limits<std::make_unsigned_t<S>>::digits;
+    const size_t MAX_BITS_NUMBER = std::numeric_limits<orq::make_unsigned_t<S>>::digits;
 
     auto compressed_size = math::div_ceil(size, MAX_BITS_NUMBER);
     BSharedVector<S, E> b1(compressed_size), b2(compressed_size), r(compressed_size);
@@ -258,7 +259,7 @@ static void linear_compare(const BSharedVector<S, E>& current, const BSharedVect
     gt_bits.bit_xor(gt_bits);
 
     // If the shares are signed numbers, we need to treat the sign bits differently
-    if (std::is_signed<S>::value) {
+    if (orq::is_signed_v<S>) {
         // Extract MSB (sign bit), compressed
         b1.pack_from(current, MAX_BITS_NUMBER - 1);
         b2.pack_from(other, MAX_BITS_NUMBER - 1);
@@ -315,7 +316,7 @@ void orq::BSharedVector<T, E>::_compare(const orq::BSharedVector<T, E>& other,
     }
 
     // Number of bits in the share representation
-    const size_t MAX_BITS_NUMBER = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    const size_t MAX_BITS_NUMBER = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
 
     auto compressed_size = math::div_ceil(size, MAX_BITS_NUMBER);
 
@@ -339,7 +340,7 @@ void orq::BSharedVector<T, E>::_compare(const orq::BSharedVector<T, E>& other,
     gt_bits.bit_xor(gt_bits);
 
     // If the shares are signed numbers, we need to treat the sign bits differently
-    if (std::is_signed<T>::value) {
+    if (orq::is_signed_v<T>) {
         BSharedVector<T, E> s1(compressed_size), s2(compressed_size), r(compressed_size);
 
         // Extract MSB (sign bit), compressed

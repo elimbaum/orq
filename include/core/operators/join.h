@@ -195,7 +195,7 @@ TABLE_T TABLE_T::_join(TABLE_T &right, std::vector<std::string> keys, Aggregatio
         auto L = size();
         auto R = right.size();
 
-        auto w = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+        auto w = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
         auto c = schema.size() - 1;  // don't count valid
 
         if (R < (L * (w + c - 1) / (c + 2))) {

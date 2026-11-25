@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     auto pID = runTime->getPartyID();
 
     using D = int32_t;
-    using uD = std::make_unsigned_t<D>;
+    using uD = orq::make_unsigned_t<D>;
 
     std::vector<std::string> schema = {
         "Salary",    // in USD

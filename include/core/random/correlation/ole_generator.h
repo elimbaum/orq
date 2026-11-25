@@ -130,7 +130,7 @@ class OLEGenerator : public CorrelationGenerator<std::tuple<Vector<T>, Vector<I>
  */
 template <typename T>
 class OLEmodPrimeInterface {
-    static_assert(std::is_unsigned_v<T>, "OLEmodPrimeInterface: T must be unsigned!");
+    static_assert(orq::is_unsigned_v<T>, "OLEmodPrimeInterface: T must be unsigned!");
 
    public:
     using wide_t = typename DoubleWidth<T>::type;
@@ -148,7 +148,7 @@ class OLEmodPrimeInterface {
 
     T getPrime() const { return prime; }
 
-    int primeBits() const { return std::bit_width(prime); }
+    int primeBits() const { return orq::bit_width(prime); }
 
     using ole_t = std::tuple<Vector<T>, Vector<wide_t>>;
 

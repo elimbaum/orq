@@ -90,6 +90,10 @@ find_package(Threads REQUIRED)
 # Adding Dependencies
 # add_subdirectory(src/external-lib/sql-parser)
 
+# Skip MPI C++ bindings: RELIC (via libOTe/SecureJoin) #define's DOUBLE,
+# which collides with OpenMPI's MPI::DOUBLE when the CXX headers are pulled in.
+add_compile_definitions(OMPI_SKIP_MPICXX MPICH_SKIP_MPICXX)
+
 # Adding MPI Library
 find_package(MPI REQUIRED)
 if (MPI_FOUND)
@@ -135,18 +139,11 @@ find_package(cryptoTools REQUIRED HINTS
 list(APPEND LINK_LIBRARIES "oc::cryptoTools")
 
 function(add_secure_join target_name)
-  if(PROTOCOL EQUAL "2" AND LINK_LIBOTE)
-    target_link_libraries(${target_name} secureJoin)
-    target_include_directories(${target_name} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/build/secure-join-install/include/secureJoin/)
-  endif()
+    if(PROTOCOL EQUAL "2" AND LINK_LIBOTE)
+        target_link_libraries(${target_name} secureJoin)
+        target_include_directories(${target_name} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/build/secure-join-install/include/secureJoin/)
+    endif()
 endfunction()
-
-if (PROTOCOL EQUAL "4")
-    add_library(print_4pc_info include/core/protocols/_4pc_selector.cpp)
-else()
-    # nop
-    add_custom_target(print_4pc_info)
-endif (PROTOCOL EQUAL "4")
 
 # Option: switch between custom 4PC and original Dalskov et al. protocol
 option(USE_DALSKOV_FANTASTIC_FOUR
@@ -156,6 +153,14 @@ option(USE_DALSKOV_FANTASTIC_FOUR
 if(USE_DALSKOV_FANTASTIC_FOUR)
     add_compile_definitions(USE_DALSKOV_FANTASTIC_FOUR)
 endif()
+
+if (PROTOCOL EQUAL "4")
+    if(USE_DALSKOV_FANTASTIC_FOUR)
+        message(STATUS "Using Dalskov 4PC protocol")
+    else()
+        message(STATUS "Using custom 4PC protocol")
+    endif()
+endif (PROTOCOL EQUAL "4")
 
 function(enable_pch target)
     target_precompile_headers(${target}
@@ -170,7 +175,6 @@ function(configure_target _target)
 
     get_filename_component(fileName ${_target} NAME_WLE)
     add_executable(${fileName} ${_target})
-    add_dependencies(${fileName} print_4pc_info)
 
     enable_pch(${fileName})
     add_secure_join(${fileName})

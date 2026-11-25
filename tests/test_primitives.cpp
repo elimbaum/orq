@@ -43,7 +43,7 @@ void test_b2a(int test_size) {
 #define DEFINE_TEST_BINARY_OP(_op_, shareType, name)                   \
     template <typename T>                                              \
     void test_##name(int test_size) {                                  \
-        auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits; \
+        auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits; \
         single_cout_nonl(L << "-bit " #name "... ");                   \
         orq::Vector<T> x(test_size);                                   \
         orq::Vector<T> y(test_size);                                   \
@@ -83,7 +83,7 @@ DEFINE_TEST_BINARY_OP(<, BSharedVector, less_than);
 
 template <typename T>
 void test_private_division(int test_size) {
-    using uT = std::make_unsigned_t<T>;
+    using uT = orq::make_unsigned_t<T>;
     auto L = std::numeric_limits<uT>::digits;
     single_cout_nonl("Boolean long division, " << L << "-bit... ");
 
@@ -120,7 +120,7 @@ void test_private_division(int test_size) {
 
 template <typename T>
 void test_dot_product(int test_size, const int aggSize = 7) {
-    auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
     single_cout_nonl(L << "-bit dot product(" << aggSize << ")... ");
 
     if (test_size % aggSize != 0) {
@@ -149,7 +149,7 @@ void test_dot_product(int test_size, const int aggSize = 7) {
 
 template <typename T>
 void test_equals(int test_size) {
-    auto L = std::numeric_limits<std::make_unsigned_t<T>>::digits;
+    auto L = std::numeric_limits<orq::make_unsigned_t<T>>::digits;
     single_cout_nonl(L << "-bit equals...");
     orq::Vector<T> x(test_size), y(test_size);
 
@@ -250,6 +250,26 @@ int main(int argc, char** argv) {
 
         assert(a_s.open().same_as(data_a + data_b));
         single_cout("Increment += OK");
+    }
+
+    {
+        orq::Vector<int> chained = data_a + data_b + data_a;
+        orq::Vector<int> stepwise = data_a + data_b;
+        stepwise += data_a;
+        assert(chained.same_as(stepwise));
+        assert((data_a + data_b).same_as(sum));
+        single_cout("Chained plaintext + OK");
+    }
+
+    {
+        ASharedVector<int> a_s = secret_share_a(data_a, 0);
+        ASharedVector<int> b_s = secret_share_a(data_b, 0);
+        ASharedVector<int> chained = a_s + b_s + a_s;
+        ASharedVector<int> stepwise = a_s + b_s;
+        stepwise += a_s;
+        assert(chained.open().same_as(stepwise.open()));
+        assert(a_s.open().same_as(data_a));
+        single_cout("Chained arithmetic + OK");
     }
 
     // Apply elementwise secure addition
@@ -398,6 +418,17 @@ int main(int argc, char** argv) {
 
         assert(a_s.open().same_as(data_a & data_b));
         single_cout("Bitwise &= OK");
+    }
+
+    {
+        BSharedVector<int> a_s = secret_share_b(data_a, 0);
+        BSharedVector<int> b_s = secret_share_b(data_b, 0);
+        BSharedVector<int> chained = a_s & b_s & a_s;
+        BSharedVector<int> stepwise = a_s & b_s;
+        stepwise &= a_s;
+        assert(chained.open().same_as(stepwise.open()));
+        assert(a_s.open().same_as(data_a));
+        single_cout("Chained bitwise & OK");
     }
 
     {

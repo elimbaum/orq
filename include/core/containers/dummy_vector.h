@@ -5,6 +5,7 @@
 #include <memory>
 #include <ranges>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "debug/orq_debug.h"
@@ -14,34 +15,32 @@
  * @brief Defines a dummy binary operator
  *
  */
-#define define_binary_vector_op(_op_) \
-    inline Vector operator _op_(const Vector& y) const { return *this; }
+#define define_binary_vector_op(_op_)                                     \
+    inline Vector operator _op_(const Vector& y) const& { return *this; } \
+    inline Vector operator _op_(const Vector& y) && { return std::move(*this); }
 
-/**
- * @brief Defines a dummy unary operator
- *
- */
-#define define_unary_vector_op(_op_) \
-    inline Vector operator _op_() const { return *this; }
+#define define_unary_vector_op(_op_)                       \
+    inline Vector operator _op_() const& { return *this; } \
+    inline Vector operator _op_() && { return std::move(*this); }
 
-/**
- * @brief Defines a dummy binary operator between a Vector and some other type.
- *
- */
-#define define_binary_vector_element_op(_op_)                   \
-    template <typename OtherType>                               \
-    inline Vector operator _op_(const OtherType& other) const { \
-        return *this;                                           \
+#define define_binary_vector_element_op(_op_)                    \
+    template <typename OtherType>                                \
+    inline Vector operator _op_(const OtherType& other) const& { \
+        return *this;                                            \
+    }                                                            \
+    template <typename OtherType>                                \
+    inline Vector operator _op_(const OtherType& other) && {     \
+        return std::move(*this);                                 \
     }
 
 /**
  * @brief Defines a dummy binary assignment operator.
  *
  */
-#define define_binary_vector_assignment_op(_op_)          \
-    template <typename OtherType>                         \
-    inline Vector operator _op_(const OtherType& other) { \
-        return *this;                                     \
+#define define_binary_vector_assignment_op(_op_)            \
+    template <typename OtherType>                           \
+    inline Vector& operator _op_(const OtherType & other) { \
+        return *this;                                       \
     }
 
 namespace orq {
@@ -72,15 +71,15 @@ namespace service {
  */
 template <typename T>
 class Vector {
-    template <typename U,
-              bool UseUnsigned = (std::integral<U> && !std::is_same_v<std::remove_cv_t<U>, bool>)>
+    template <typename U, bool UseUnsigned = ((std::integral<U> || extended_integral<U>) &&
+                                              !std::is_same_v<std::remove_cv_t<U>, bool>)>
     struct UnsignedTypeSelector {
         using type = U;
     };
 
     template <typename U>
     struct UnsignedTypeSelector<U, true> {
-        using type = std::make_unsigned_t<U>;
+        using type = orq::make_unsigned_t<U>;
     };
 
     /**
@@ -162,7 +161,7 @@ class Vector {
      * conversion. Default is 16.
      */
     template <std::floating_point FP>
-        requires std::integral<T>
+        requires std::integral<T> || extended_integral<T>
     Vector(const std::vector<FP>& _other, int fixed_point_precision = 16)
         : Vector(static_cast<VectorSizeType>(_other.size())) {
         precision = fixed_point_precision;
@@ -182,6 +181,8 @@ class Vector {
     Vector(const Vector& other) : length(other.length) {}
 
     Vector(Vector& other) : length(other.length) {}
+
+    Vector(Vector&& other) noexcept = default;
 
     inline Vector bit_arithmetic_right_shift(int shift_size) const { return *this; }
 
@@ -238,6 +239,8 @@ class Vector {
     std::span<const T> span() const { return {}; }
 
     bool has_mapping() const { return false; }
+
+    bool owns_storage() const { return true; }
 
     /**
      * @brief Return a dummy vector of the correct size
@@ -416,6 +419,8 @@ class Vector {
 
     void reverse() {}
 
+    Vector& operator=(Vector&& other) { return *this; }
+
     Vector& operator=(const Vector&& other) { return *this; }
 
     Vector& operator=(const Vector& other) { return *this; }
@@ -491,6 +496,8 @@ class Vector {
 
     define_binary_vector_element_op(>);
     define_binary_vector_element_op(<);
+    define_binary_vector_element_op(>=);
+    define_binary_vector_element_op(<=);
     define_binary_vector_element_op(==);
     define_binary_vector_element_op(!=);
 
